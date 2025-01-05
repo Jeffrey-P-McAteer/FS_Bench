@@ -103,8 +103,12 @@ int main(int argc, char** argv) {
   }
 
   // Now that we have the file names + contents prepped, perform the actual I/O operations for the test.
-  std::chrono::high_resolution_clock::duration per_file_ext_duration_sums[std::size(file_extensions)]; // we record for each file type create + write durations
 
+  // we record for each file type create + write durations
+  std::vector<std::chrono::high_resolution_clock::duration> per_file_ext_durations[std::size(file_extensions)];
+  for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
+    per_file_ext_durations[i].reserve( num_folders * num_files_in_folder / (std::size(file_extensions)/2) );
+  }
 
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -115,20 +119,79 @@ int main(int argc, char** argv) {
       auto file_start = std::chrono::high_resolution_clock::now();
 
       std::filesystem::path file_path = folder_paths[folder_i] / file_names[file_i];
-      std::ofstream outfile(file_path, std::ios::out | std::ios::binary);
-      //outfile.write((const char*) &file_contents[file_i][0], file_contents[file_i].size());
-      outfile.write((const char*) file_contents[file_i].data(), file_contents[file_i].size());
+      {
+        std::ofstream outfile(file_path, std::ios::out | std::ios::binary);
+        outfile.write((const char*) file_contents[file_i].data(), file_contents[file_i].size());
+        outfile.flush();
+      }
+
+      // Now delete the file and ensure it is deleted
+      std::filesystem::remove(file_path);
+
+      if (std::filesystem::exists(file_path)) {
+        std::cout << "WARNING: We attempted to delete " << file_path << " but were somehow unsuccessful. Waiting for OS to complete file deletion..." << std::endl;
+        test_is_anomalous = true;
+        while (std::filesystem::exists(file_path)) {
+          // We aren't sleeping at all because that will mess up timing numbers; we want as CLOSE AS POSSIBLE to ground truth from the operating system.
+        }
+      }
+
+      // And finally write a 2nd time
+      {
+        std::ofstream outfile(file_path, std::ios::out | std::ios::binary);
+        outfile.write((const char*) file_contents[file_i].data(), file_contents[file_i].size());
+        outfile.flush();
+      }
 
       auto file_elapsed = std::chrono::high_resolution_clock::now() - file_start;
-      per_file_ext_duration_sums[file_extension_idx[file_i]] += file_elapsed;
+      per_file_ext_durations[file_extension_idx[file_i]].push_back(file_elapsed);
+
     }
   }
 
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
 
-  std::chrono::high_resolution_clock::duration per_file_ext_avg_write_duration[std::size(file_extensions)];
+  // Test DONE, compute statistics
+
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_sums[std::size(file_extensions)] = {
+    std::chrono::high_resolution_clock::duration::zero()
+  };
+
+  // we record for each file type create + write MAX
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_max[std::size(file_extensions)] = {
+    std::chrono::high_resolution_clock::duration::zero()
+  };
+  // we record for each file type create + write MIN
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_min[std::size(file_extensions)] = {
+    std::chrono::high_resolution_clock::duration::max()
+  };
+
+  // we record for each file type create + write MAX
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_max_ten_perc[std::size(file_extensions)] = {
+    std::chrono::high_resolution_clock::duration::zero()
+  };
+  // we record for each file type create + write MIN
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_min_ten_perc[std::size(file_extensions)] = {
+    std::chrono::high_resolution_clock::duration::max()
+  };
+
   for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
-    per_file_ext_avg_write_duration[i] = per_file_ext_duration_sums[i] / std::max((int_fast32_t) 1, file_ext_count[i]);
+    // Each of per_file_ext_durations[i] will be sorted MIN -> MAX
+    std::sort(per_file_ext_durations[i].begin(), per_file_ext_durations[i].end());
+
+    for (auto file_elapsed : per_file_ext_durations[i]) {
+      per_file_ext_duration_sums[i] += file_elapsed;
+    }
+
+    if (per_file_ext_durations[i].size() > 0) {
+      per_file_ext_duration_max[i] = per_file_ext_durations[i][per_file_ext_durations[i].size()-1];
+      per_file_ext_duration_min[i] = per_file_ext_durations[i][0];
+
+      per_file_ext_duration_max_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()-1) * 9)/10 ];
+      per_file_ext_duration_min_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()) * 1)/10 ];
+
+    }
+
   }
 
   long long total_microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -143,13 +206,44 @@ int main(int argc, char** argv) {
   std::cout << "Completed writing " << std::fixed << std::showpoint << std::setprecision(1) << ((double) total_bytes_written / (1024.0 * 1024.0)) << " GB of data to " << std::fixed << (num_folders * num_files_in_folder) << " files." << std::endl;
   std::cout << "Test took " << m << "m " << s << "s " << ms << "ms" << std::endl;
 
+  std::cout << "= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =" << std::endl;
   for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
-    long long ext_total_microseconds = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_avg_write_duration[i]).count();
-    long ext_m = ext_total_microseconds / (60 * 1000 * 1000);
-    long ext_s = (ext_total_microseconds - (ext_m * 60 * 1000 * 1000)) / (1000 * 1000);
-    double ext_ms = ((double) ((ext_total_microseconds - (ext_m * 60 * 1000 * 1000)) - (ext_s * 1000 * 1000))) / 1000.0;
-    std::cout << "On average a " << std::setw(6) << file_extensions[i] << " file took " << m << "m " << s << "s " << ms << "ms to complete writing data." << std::endl;
+    long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums[i]).count();
+    long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int_fast32_t) 1, num_folders*file_ext_count[i]);
+    double ext_ms = ((double) ext_total_microseconds) / 1000.0;
+    double total_ext_bytes_written = (double) file_content_length_bytes * file_ext_count[i];
+    double bytes_per_second = total_ext_bytes_written / std::max(0.0001, ((double) ext_total_microseconds / (1000.0 * 1000.0)));
+
+    double max_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_max[i]).count() ) / 1000.0;
+    double min_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_min[i]).count() ) / 1000.0;
+    double deviation_ms = max_ext_ms - min_ext_ms;
+
+    std::cout << std::setw(5) << file_extensions[i] << " files averaged " <<
+        std::setprecision(5) << ext_ms << "ms " <<
+        "(max " << max_ext_ms <<"ms min " << min_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
+        "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
   }
+
+  std::cout << "= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =" << std::endl;
+  for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
+    long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums[i]).count();
+    long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int_fast32_t) 1, num_folders*file_ext_count[i]);
+    double ext_ms = ((double) ext_total_microseconds) / 1000.0;
+    double total_ext_bytes_written = (double) file_content_length_bytes * file_ext_count[i];
+    double bytes_per_second = total_ext_bytes_written / std::max(0.0001, ((double) ext_total_microseconds / (1000.0 * 1000.0)));
+
+    double max_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_max_ten_perc[i]).count() ) / 1000.0;
+    double min_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_min_ten_perc[i]).count() ) / 1000.0;
+    double deviation_ms = max_ext_ms - min_ext_ms;
+
+    std::cout << std::setw(5) << file_extensions[i] << " files averaged " <<
+        std::setprecision(5) << ext_ms << "ms " <<
+        "(max " << max_ext_ms <<"ms min " << min_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
+        "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
+  }
+
+  std::cout << std::boolalpha;
+  VARDUMP(test_is_anomalous);
 
   return 0;
 }
