@@ -75,4 +75,29 @@ Test took 1m 51s 69.4ms
 test_is_anomalous=false
 ```
 
+Thinkpad P14s USB-C SSD running Windows 11 with an NTFS filesystem
+
+```
+test_folder="C:\\Users\\Jeffrey\\Downloads\\test-space"
+folder_device_path=TODO implement C:\Users\Jeffrey\FS_Bench\fs_bench_os_windows.hpp:6
+Completed writing 6,250.0 GB of data to 100,000 files.
+Test took 1m 47s 153.7ms
+= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =
+ .exe files averaged 0.92600ms (max 131.11100ms min 0.31600ms deviation of 130.79500ms) to complete write+delete+write data (10,664.14687 megabytes per second, 15,800 files tested)
+ .dll files averaged 1.11200ms (max 223.64600ms min 0.30700ms deviation of 223.33900ms) to complete write+delete+write data (9,330.03597 megabytes per second, 16,600 files tested)
+ .txt files averaged 0.92800ms (max 207.40200ms min 0.31400ms deviation of 207.08800ms) to complete write+delete+write data (12,931.03448 megabytes per second, 19,200 files tested)
+.json files averaged 1.39000ms (max 604.85300ms min 0.31300ms deviation of 604.54000ms) to complete write+delete+write data (7,059.35252 megabytes per second, 15,700 files tested)
+  .so files averaged 1.12600ms (max 589.21700ms min 0.30200ms deviation of 588.91500ms) to complete write+delete+write data (9,713.58792 megabytes per second, 17,500 files tested)
+ .bin files averaged 0.95800ms (max 192.54100ms min 0.31300ms deviation of 192.22800ms) to complete write+delete+write data (9,916.49269 megabytes per second, 15,200 files tested)
+= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =
+ .exe files averaged 0.61400ms (max 1.37700ms min 0.43700ms deviation of 0.94000ms) to complete write+delete+write data (16,083.06189 megabytes per second, 15,800 files tested)
+ .dll files averaged 0.62300ms (max 1.39400ms min 0.44100ms deviation of 0.95300ms) to complete write+delete+write data (16,653.29053 megabytes per second, 16,600 files tested)
+ .txt files averaged 0.61400ms (max 1.36800ms min 0.44100ms deviation of 0.92700ms) to complete write+delete+write data (19,543.97394 megabytes per second, 19,200 files tested)
+.json files averaged 0.63600ms (max 1.43400ms min 0.44700ms deviation of 0.98700ms) to complete write+delete+write data (15,428.45912 megabytes per second, 15,700 files tested)
+  .so files averaged 0.62100ms (max 1.38800ms min 0.44000ms deviation of 0.94800ms) to complete write+delete+write data (17,612.72142 megabytes per second, 17,500 files tested)
+ .bin files averaged 0.61300ms (max 1.37400ms min 0.43900ms deviation of 0.93500ms) to complete write+delete+write data (15,497.55302 megabytes per second, 15,200 files tested)
+test_is_anomalous=false
+```
+
+
 
