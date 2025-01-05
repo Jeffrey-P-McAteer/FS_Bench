@@ -24,6 +24,23 @@
 // we'd like to use std::byte, but templates can't peer past the definition -_-
 #define BYTE_T unsigned char
 
+void print_report(
+  int64_t num_file_extensions,
+  std::string file_extensions[],
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_sums[],
+  int64_t file_ext_count[],
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_max[],
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_min[]
+);
+
+// Constants
+const int64_t num_folders = 100;
+const int64_t num_files_in_folder = 1000;
+const int64_t file_content_length_bytes = 64 * 1024;
+std::string file_extensions[] = {
+  ".exe", ".dll", ".txt", ".json", ".so", ".bin"
+};
+const int_fast64_t total_bytes_written = num_folders * num_files_in_folder * file_content_length_bytes;
 
 int main(int argc, char** argv) {
   // Read args + initialize test preconditions
@@ -61,14 +78,6 @@ int main(int argc, char** argv) {
   std::uniform_int_distribution<int64_t> uniform_dist_bignums(0, INT_FAST32_MAX);
   // Windows cannot represent "unsigned char" in its independent_bits_engine -_-
   std::independent_bits_engine<std::default_random_engine, CHAR_BIT, unsigned short> random_bytes_engine;
-
-  const int64_t num_folders = 100;
-  const int64_t num_files_in_folder = 1000;
-  const int64_t file_content_length_bytes = 64 * 1024;
-  std::string file_extensions[] = {
-    ".exe", ".dll", ".txt", ".json", ".so", ".bin"
-  };
-  const int_fast64_t total_bytes_written = num_folders * num_files_in_folder * file_content_length_bytes;
 
   std::uniform_int_distribution<int64_t> uniform_dist_file_extensions(0, std::size(file_extensions)-1);
 
@@ -178,6 +187,11 @@ int main(int argc, char** argv) {
     std::chrono::high_resolution_clock::duration::max()
   };
 
+  int64_t file_ext_count_within_ten_perc[std::size(file_extensions)]; // counts number of files which are within 90% of file_ext_count
+  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
+    file_ext_count_within_ten_perc[i] = 0;
+  }
+
   for (int64_t i=0; i<std::size(file_extensions); i+=1) {
     // Each of per_file_ext_durations[i] will be sorted MIN -> MAX
     std::sort(per_file_ext_durations[i].begin(), per_file_ext_durations[i].end());
@@ -194,7 +208,9 @@ int main(int argc, char** argv) {
       per_file_ext_duration_min_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()) * 1)/10 ];
       for (int64_t j=((per_file_ext_durations[i].size()) * 1)/10; j < ((per_file_ext_durations[i].size()-1) * 9)/10 ; j+=1) {
           per_file_ext_duration_sums_ten_perc[i] += per_file_ext_durations[i][j];
+          file_ext_count_within_ten_perc[i] += 1;
       }
+      file_ext_count_within_ten_perc[i] /= num_folders; // The above loop has timings for ALL folders, causing an over-count here if we do not divide by number of folders.
 
     }
 
@@ -213,7 +229,41 @@ int main(int argc, char** argv) {
   std::cout << "Test took " << m << "m " << s << "s " << ms << "ms" << std::endl;
 
   std::cout << "= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =" << std::endl;
-  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
+  print_report(
+    std::size(file_extensions),
+    file_extensions,
+    per_file_ext_duration_sums,
+    file_ext_count,
+    per_file_ext_duration_max,
+    per_file_ext_duration_min
+  );
+
+  std::cout << "= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =" << std::endl;
+  print_report(
+    std::size(file_extensions),
+    file_extensions,
+    per_file_ext_duration_sums_ten_perc,
+    file_ext_count_within_ten_perc,
+    per_file_ext_duration_max_ten_perc,
+    per_file_ext_duration_min_ten_perc
+  );
+
+  std::cout << std::boolalpha;
+  VARDUMP(test_is_anomalous);
+
+  return 0;
+}
+
+void print_report(
+  int64_t num_file_extensions,
+  std::string file_extensions[],
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_sums[],
+  int64_t file_ext_count[],
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_max[],
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_min[]
+)
+{
+  for (int64_t i=0; i<num_file_extensions; i+=1) {
     long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums[i]).count();
     long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int64_t) 1, num_folders*file_ext_count[i]);
     double ext_ms = ((double) ext_total_microseconds) / 1000.0;
@@ -229,28 +279,4 @@ int main(int argc, char** argv) {
         "(max " << max_ext_ms <<"ms min " << min_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
         "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
   }
-
-  std::cout << "= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =" << std::endl;
-  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
-    long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums_ten_perc[i]).count();
-    long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int64_t) 1, num_folders*file_ext_count[i]);
-    double ext_ms = ((double) ext_total_microseconds) / 1000.0;
-    double total_ext_bytes_written = (double) file_content_length_bytes * file_ext_count[i];
-    double bytes_per_second = total_ext_bytes_written / std::max(0.0001, ((double) ext_total_microseconds / (1000.0 * 1000.0)));
-
-    double max_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_max_ten_perc[i]).count() ) / 1000.0;
-    double min_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_min_ten_perc[i]).count() ) / 1000.0;
-    double deviation_ms = max_ext_ms - min_ext_ms;
-
-    std::cout << std::setw(5) << file_extensions[i] << " files averaged " <<
-        std::setprecision(5) << ext_ms << "ms " <<
-        "(max " << max_ext_ms <<"ms min " << min_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
-        "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
-  }
-
-  std::cout << std::boolalpha;
-  VARDUMP(test_is_anomalous);
-
-  return 0;
 }
-
