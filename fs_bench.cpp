@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <filesystem>
+#include <cstdint>
 
 #if defined(_WIN32) || defined(WIN32)
 #include "fs_bench_os_windows.hpp"
