@@ -58,40 +58,40 @@ int main(int argc, char** argv) {
 
   std::random_device rand;
   std::default_random_engine rand_engine(rand());
-  std::uniform_int_distribution<int_fast32_t> uniform_dist_bignums(0, INT_FAST32_MAX);
+  std::uniform_int_distribution<int64_t> uniform_dist_bignums(0, INT_FAST32_MAX);
   // Windows cannot represent "unsigned char" in its independent_bits_engine -_-
   std::independent_bits_engine<std::default_random_engine, CHAR_BIT, unsigned short> random_bytes_engine;
 
-  const int_fast32_t num_folders = 100;
-  const int_fast32_t num_files_in_folder = 1000;
-  const int_fast32_t file_content_length_bytes = 64 * 1024;
+  const int64_t num_folders = 100;
+  const int64_t num_files_in_folder = 1000;
+  const int64_t file_content_length_bytes = 64 * 1024;
   std::string file_extensions[] = {
     ".exe", ".dll", ".txt", ".json", ".so", ".bin"
   };
   const int_fast64_t total_bytes_written = num_folders * num_files_in_folder * file_content_length_bytes;
 
-  std::uniform_int_distribution<int_fast32_t> uniform_dist_file_extensions(0, std::size(file_extensions)-1);
+  std::uniform_int_distribution<int64_t> uniform_dist_file_extensions(0, std::size(file_extensions)-1);
 
   std::vector<std::filesystem::path> folder_paths;
 
   std::vector<std::string> file_names;
-  std::vector<int_fast32_t> file_extension_idx; // For each file_names[i] points to the extension index in file_extensions[]
+  std::vector<int64_t> file_extension_idx; // For each file_names[i] points to the extension index in file_extensions[]
   std::vector<std::vector<BYTE_T>> file_contents;
 
-  int_fast32_t file_ext_count[std::size(file_extensions)];
-  for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
+  int64_t file_ext_count[std::size(file_extensions)];
+  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
     file_ext_count[i] = 0;
   }
 
-  for (int_fast32_t folder_i=0; folder_i < num_folders; folder_i += 1) {
+  for (int64_t folder_i=0; folder_i < num_folders; folder_i += 1) {
     std::stringstream ss;
     ss << std::hex << uniform_dist_bignums(rand_engine);
     folder_paths.push_back( test_folder / ss.str() );
   }
 
-  for (int_fast32_t file_i=0; file_i < num_files_in_folder; file_i += 1) {
+  for (int64_t file_i=0; file_i < num_files_in_folder; file_i += 1) {
     std::stringstream ss;
-    int_fast32_t file_extension_i = uniform_dist_file_extensions(rand_engine);
+    int64_t file_extension_i = uniform_dist_file_extensions(rand_engine);
     ss << std::hex << uniform_dist_bignums(rand_engine) << file_extensions[file_extension_i];
 
     std::vector<BYTE_T> contents(file_content_length_bytes);
@@ -107,16 +107,16 @@ int main(int argc, char** argv) {
 
   // we record for each file type create + write durations
   std::vector<std::chrono::high_resolution_clock::duration> per_file_ext_durations[std::size(file_extensions)];
-  for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
+  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
     per_file_ext_durations[i].reserve( num_folders * num_files_in_folder / (std::size(file_extensions)/2) );
   }
 
   auto start = std::chrono::high_resolution_clock::now();
 
-  for (int_fast32_t folder_i=0; folder_i < num_folders; folder_i += 1) {
+  for (int64_t folder_i=0; folder_i < num_folders; folder_i += 1) {
     std::filesystem::create_directories(folder_paths[folder_i]);
 
-    for (int_fast32_t file_i=0; file_i < num_files_in_folder; file_i += 1) {
+    for (int64_t file_i=0; file_i < num_files_in_folder; file_i += 1) {
       auto file_start = std::chrono::high_resolution_clock::now();
 
       std::filesystem::path file_path = folder_paths[folder_i] / file_names[file_i];
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
     std::chrono::high_resolution_clock::duration::max()
   };
 
-  for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
+  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
     // Each of per_file_ext_durations[i] will be sorted MIN -> MAX
     std::sort(per_file_ext_durations[i].begin(), per_file_ext_durations[i].end());
 
@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
 
       per_file_ext_duration_max_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()-1) * 9)/10 ];
       per_file_ext_duration_min_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()) * 1)/10 ];
-      for (int_fast32_t j=((per_file_ext_durations[i].size()) * 1)/10; j < ((per_file_ext_durations[i].size()-1) * 9)/10 ; j+=1) {
+      for (int64_t j=((per_file_ext_durations[i].size()) * 1)/10; j < ((per_file_ext_durations[i].size()-1) * 9)/10 ; j+=1) {
           per_file_ext_duration_sums_ten_perc[i] += per_file_ext_durations[i][j];
       }
 
@@ -213,9 +213,9 @@ int main(int argc, char** argv) {
   std::cout << "Test took " << m << "m " << s << "s " << ms << "ms" << std::endl;
 
   std::cout << "= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =" << std::endl;
-  for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
+  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
     long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums[i]).count();
-    long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int_fast32_t) 1, num_folders*file_ext_count[i]);
+    long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int64_t) 1, num_folders*file_ext_count[i]);
     double ext_ms = ((double) ext_total_microseconds) / 1000.0;
     double total_ext_bytes_written = (double) file_content_length_bytes * file_ext_count[i];
     double bytes_per_second = total_ext_bytes_written / std::max(0.0001, ((double) ext_total_microseconds / (1000.0 * 1000.0)));
@@ -231,9 +231,9 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =" << std::endl;
-  for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
+  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
     long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums_ten_perc[i]).count();
-    long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int_fast32_t) 1, num_folders*file_ext_count[i]);
+    long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int64_t) 1, num_folders*file_ext_count[i]);
     double ext_ms = ((double) ext_total_microseconds) / 1000.0;
     double total_ext_bytes_written = (double) file_content_length_bytes * file_ext_count[i];
     double bytes_per_second = total_ext_bytes_written / std::max(0.0001, ((double) ext_total_microseconds / (1000.0 * 1000.0)));
