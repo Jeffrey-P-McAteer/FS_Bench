@@ -3,5 +3,5 @@ bin
 build
 obj
 pyenv
-
+*.obj
 
