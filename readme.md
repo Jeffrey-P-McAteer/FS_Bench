@@ -145,3 +145,28 @@ Test took 3m 58s 724.4ms
 test_is_anomalous=false
 ```
 
+BeBox Mini-PC NVME Drive running Arch Linux with a BCacheFS filesystem
+
+```
+test_folder="/home/user/test-space"
+folder_device_path=/dev/nvme0n1p2
+Completed writing 6,250.0 GB of data to 100,000 files.
+Test took 0m 7s 405.8ms
+= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =
+ .exe files averaged 0.06900ms (max 36.92600ms min 0.04200ms deviation of 36.88400ms) to complete write+delete+write data (91,875.00000 megabytes per second, 14,700 files tested)
+ .dll files averaged 0.07500ms (max 38.67800ms min 0.04200ms deviation of 38.63600ms) to complete write+delete+write data (103,125.00000 megabytes per second, 16,500 files tested)
+ .txt files averaged 0.07200ms (max 37.47400ms min 0.04200ms deviation of 37.43200ms) to complete write+delete+write data (110,625.00000 megabytes per second, 17,700 files tested)
+.json files averaged 0.07900ms (max 36.56100ms min 0.04200ms deviation of 36.51900ms) to complete write+delete+write data (101,875.00000 megabytes per second, 16,300 files tested)
+  .so files averaged 0.07100ms (max 37.50200ms min 0.04100ms deviation of 37.46100ms) to complete write+delete+write data (112,500.00000 megabytes per second, 18,000 files tested)
+ .bin files averaged 0.07400ms (max 38.51200ms min 0.04100ms deviation of 38.47100ms) to complete write+delete+write data (105,000.00000 megabytes per second, 16,800 files tested)
+= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =
+ .exe files averaged 0.03800ms (max 0.05700ms min 0.04500ms deviation of 0.01200ms) to complete write+delete+write data (91,875.00000 megabytes per second, 14,700 files tested)
+ .dll files averaged 0.03800ms (max 0.05800ms min 0.04500ms deviation of 0.01300ms) to complete write+delete+write data (103,125.00000 megabytes per second, 16,500 files tested)
+ .txt files averaged 0.03800ms (max 0.05700ms min 0.04500ms deviation of 0.01200ms) to complete write+delete+write data (110,625.00000 megabytes per second, 17,700 files tested)
+.json files averaged 0.03900ms (max 0.05900ms min 0.04500ms deviation of 0.01400ms) to complete write+delete+write data (101,875.00000 megabytes per second, 16,300 files tested)
+  .so files averaged 0.03900ms (max 0.05900ms min 0.04500ms deviation of 0.01400ms) to complete write+delete+write data (112,500.00000 megabytes per second, 18,000 files tested)
+ .bin files averaged 0.03800ms (max 0.05800ms min 0.04500ms deviation of 0.01300ms) to complete write+delete+write data (105,000.00000 megabytes per second, 16,800 files tested)
+test_is_anomalous=false
+```
+
+
