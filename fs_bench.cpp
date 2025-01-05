@@ -166,11 +166,13 @@ int main(int argc, char** argv) {
     std::chrono::high_resolution_clock::duration::max()
   };
 
-  // we record for each file type create + write MAX
+  std::chrono::high_resolution_clock::duration per_file_ext_duration_sums_ten_perc[std::size(file_extensions)] = {
+    std::chrono::high_resolution_clock::duration::zero()
+  };
+
   std::chrono::high_resolution_clock::duration per_file_ext_duration_max_ten_perc[std::size(file_extensions)] = {
     std::chrono::high_resolution_clock::duration::zero()
   };
-  // we record for each file type create + write MIN
   std::chrono::high_resolution_clock::duration per_file_ext_duration_min_ten_perc[std::size(file_extensions)] = {
     std::chrono::high_resolution_clock::duration::max()
   };
@@ -189,6 +191,9 @@ int main(int argc, char** argv) {
 
       per_file_ext_duration_max_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()-1) * 9)/10 ];
       per_file_ext_duration_min_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()) * 1)/10 ];
+      for (int_fast32_t j=((per_file_ext_durations[i].size()) * 1)/10; j < ((per_file_ext_durations[i].size()-1) * 9)/10 ; j+=1) {
+          per_file_ext_duration_sums_ten_perc[i] += per_file_ext_durations[i][j];
+      }
 
     }
 
@@ -226,7 +231,7 @@ int main(int argc, char** argv) {
 
   std::cout << "= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =" << std::endl;
   for (int_fast32_t i=0; i<std::size(file_extensions); i+=1) {
-    long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums[i]).count();
+    long long ext_total_microseconds_sum = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_sums_ten_perc[i]).count();
     long long ext_total_microseconds = ext_total_microseconds_sum / std::max((int_fast32_t) 1, num_folders*file_ext_count[i]);
     double ext_ms = ((double) ext_total_microseconds) / 1000.0;
     double total_ext_bytes_written = (double) file_content_length_bytes * file_ext_count[i];
