@@ -15,6 +15,7 @@ echo "CXX=$CXX"
 mkdir -p bin
 $CXX \
   -std=c++20 \
+  -O2 \
   fs_bench.cpp \
   -o ./bin/fs_bench
 

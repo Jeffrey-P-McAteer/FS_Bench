@@ -23,6 +23,7 @@ int_fast16_t num_matching_prefix_chars(std::string& a, std::string& b) {
   return num_matching;
 }
 
+// OS function
 std::string get_device_path(const std::filesystem::path folder) {
   std::ifstream mountInfo("/proc/mounts");
   std::string folder_as_string = folder.string();
