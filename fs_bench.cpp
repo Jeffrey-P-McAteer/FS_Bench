@@ -20,9 +20,13 @@ int main(int argc, char** argv) {
   }
   const std::filesystem::path test_folder = argv[1];
   VARDUMP(test_folder);
+  if (!std::filesystem::exists(test_folder)) {
+    std::filesystem::create_directories(test_folder);
+  }
 
   const std::string folder_device_path = get_device_path(test_folder);
   VARDUMP(folder_device_path);
+
 
 
   return 0;
