@@ -6,6 +6,6 @@ if not exist "bin" (
   mkdir "bin"
 )
 
-cl -std=c++20 -O2 fs_bench.cpp -o .\bin\fs_bench.exe
+cl  /std:c++20 /O2 fs_bench.cpp /Fe .\bin\fs_bench.exe
 
 echo "Built .\bin\fs_bench.exe"
