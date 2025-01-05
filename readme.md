@@ -169,4 +169,73 @@ Test took 0m 7s 405.8ms
 test_is_anomalous=false
 ```
 
+Gaming PC with 3 different types of drives installed running Windows 10
+
+```
+test_folder="D:\\sata-magnetic-hdd-test-folder"
+folder_device_path=TODO implement C:\Users\Jeffrey\FS_Bench\fs_bench_os_windows.hpp:6
+Completed writing 6,250.0 GB of data to 100,000 files.
+Test took 3m 0s 174.7ms
+= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =
+ .exe files averaged 2.45500ms (max 1,648.66000ms min 0.42200ms deviation of 1,648.23800ms) to complete write+delete+write data (4,378.81874 megabytes per second, 17,200 files tested)
+ .dll files averaged 1.33500ms (max 1,102.74800ms min 0.42600ms deviation of 1,102.32200ms) to complete write+delete+write data (7,584.26966 megabytes per second, 16,200 files tested)
+ .txt files averaged 1.90100ms (max 1,363.32400ms min 0.42500ms deviation of 1,362.89900ms) to complete write+delete+write data (5,622.04103 megabytes per second, 17,100 files tested)
+.json files averaged 1.67600ms (max 1,385.75400ms min 0.42400ms deviation of 1,385.33000ms) to complete write+delete+write data (5,780.13126 megabytes per second, 15,500 files tested)
+  .so files averaged 1.80800ms (max 1,166.61600ms min 0.42300ms deviation of 1,166.19300ms) to complete write+delete+write data (5,980.36504 megabytes per second, 17,300 files tested)
+ .bin files averaged 1.57800ms (max 1,116.93000ms min 0.42800ms deviation of 1,116.50200ms) to complete write+delete+write data (6,614.38530 megabytes per second, 16,700 files tested)
+= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =
+ .exe files averaged 0.49900ms (max 1.09600ms min 0.54500ms deviation of 0.55100ms) to complete write+delete+write data (21,543.08617 megabytes per second, 17,200 files tested)
+ .dll files averaged 0.49300ms (max 0.86200ms min 0.54700ms deviation of 0.31500ms) to complete write+delete+write data (20,537.52535 megabytes per second, 16,200 files tested)
+ .txt files averaged 0.49400ms (max 0.89300ms min 0.54700ms deviation of 0.34600ms) to complete write+delete+write data (21,634.61538 megabytes per second, 17,100 files tested)
+.json files averaged 0.49300ms (max 0.86200ms min 0.54800ms deviation of 0.31400ms) to complete write+delete+write data (19,650.10142 megabytes per second, 15,500 files tested)
+  .so files averaged 0.49500ms (max 0.91700ms min 0.54800ms deviation of 0.36900ms) to complete write+delete+write data (21,843.43434 megabytes per second, 17,300 files tested)
+ .bin files averaged 0.49300ms (max 0.89000ms min 0.54700ms deviation of 0.34300ms) to complete write+delete+write data (21,171.39959 megabytes per second, 16,700 files tested)
+test_is_anomalous=false
+
+
+
+test_folder="F:\\usb-magnetic-hdd-test-folder"
+folder_device_path=TODO implement C:\Users\Jeffrey\FS_Bench\fs_bench_os_windows.hpp:6
+Completed writing 6,250.0 GB of data to 100,000 files.
+Test took 7m 33s 715.8ms
+= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =
+ .exe files averaged 4.41300ms (max 998.01800ms min 2.30700ms deviation of 995.71100ms) to complete write+delete+write data (2,464.30999 megabytes per second, 17,400 files tested)
+ .dll files averaged 4.57500ms (max 1,355.26700ms min 2.30900ms deviation of 1,352.95800ms) to complete write+delete+write data (2,117.48634 megabytes per second, 15,500 files tested)
+ .txt files averaged 4.52400ms (max 768.14200ms min 2.33400ms deviation of 765.80800ms) to complete write+delete+write data (2,348.58532 megabytes per second, 17,000 files tested)
+.json files averaged 4.72900ms (max 877.86700ms min 2.38500ms deviation of 875.48200ms) to complete write+delete+write data (2,048.53034 megabytes per second, 15,500 files tested)
+  .so files averaged 4.58600ms (max 1,271.64300ms min 2.34800ms deviation of 1,269.29500ms) to complete write+delete+write data (2,398.60445 megabytes per second, 17,600 files tested)
+ .bin files averaged 4.41000ms (max 726.85200ms min 2.32000ms deviation of 724.53200ms) to complete write+delete+write data (2,409.29705 megabytes per second, 17,000 files tested)
+= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =
+ .exe files averaged 2.46200ms (max 3.58700ms min 2.67400ms deviation of 0.91300ms) to complete write+delete+write data (4,417.14054 megabytes per second, 17,400 files tested)
+ .dll files averaged 2.46500ms (max 3.60000ms min 2.67900ms deviation of 0.92100ms) to complete write+delete+write data (3,930.02028 megabytes per second, 15,500 files tested)
+ .txt files averaged 2.46400ms (max 3.59600ms min 2.67800ms deviation of 0.91800ms) to complete write+delete+write data (4,312.09416 megabytes per second, 17,000 files tested)
+.json files averaged 2.53800ms (max 3.71200ms min 2.74400ms deviation of 0.96800ms) to complete write+delete+write data (3,816.98188 megabytes per second, 15,500 files tested)
+  .so files averaged 2.46800ms (max 3.59600ms min 2.67900ms deviation of 0.91700ms) to complete write+delete+write data (4,457.05024 megabytes per second, 17,600 files tested)
+ .bin files averaged 2.46700ms (max 3.59700ms min 2.67900ms deviation of 0.91800ms) to complete write+delete+write data (4,306.85043 megabytes per second, 17,000 files tested)
+test_is_anomalous=false
+
+
+test_folder="C:\\Users\\Jeffrey\\Downloads\\test-folder"
+folder_device_path=TODO implement C:\Users\Jeffrey\FS_Bench\fs_bench_os_windows.hpp:6
+Completed writing 6,250.0 GB of data to 100,000 files.
+Test took 5m 34s 94.1ms
+= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =
+ .exe files averaged 3.36000ms (max 492.01100ms min 0.69100ms deviation of 491.32000ms) to complete write+delete+write data (3,199.40476 megabytes per second, 17,200 files tested)
+ .dll files averaged 3.22000ms (max 2,662.93800ms min 0.67700ms deviation of 2,662.26100ms) to complete write+delete+write data (3,027.95031 megabytes per second, 15,600 files tested)
+ .txt files averaged 3.21500ms (max 445.07500ms min 0.67200ms deviation of 444.40300ms) to complete write+delete+write data (3,479.78227 megabytes per second, 17,900 files tested)
+.json files averaged 3.44700ms (max 744.81500ms min 0.69400ms deviation of 744.12100ms) to complete write+delete+write data (2,701.62460 megabytes per second, 14,900 files tested)
+  .so files averaged 3.49800ms (max 497.71700ms min 0.67100ms deviation of 497.04600ms) to complete write+delete+write data (2,948.11321 megabytes per second, 16,500 files tested)
+ .bin files averaged 3.29500ms (max 1,246.32100ms min 0.67400ms deviation of 1,245.64700ms) to complete write+delete+write data (3,395.29590 megabytes per second, 17,900 files tested)
+= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =
+ .exe files averaged 0.83900ms (max 1.58600ms min 0.84500ms deviation of 0.74100ms) to complete write+delete+write data (12,812.87247 megabytes per second, 17,200 files tested)
+ .dll files averaged 0.83700ms (max 1.58500ms min 0.84800ms deviation of 0.73700ms) to complete write+delete+write data (11,648.74552 megabytes per second, 15,600 files tested)
+ .txt files averaged 0.83800ms (max 1.57500ms min 0.84200ms deviation of 0.73300ms) to complete write+delete+write data (13,350.23866 megabytes per second, 17,900 files tested)
+.json files averaged 0.85500ms (max 1.61700ms min 0.85800ms deviation of 0.75900ms) to complete write+delete+write data (10,891.81287 megabytes per second, 14,900 files tested)
+  .so files averaged 0.84000ms (max 1.59800ms min 0.84700ms deviation of 0.75100ms) to complete write+delete+write data (12,276.78571 megabytes per second, 16,500 files tested)
+ .bin files averaged 0.83500ms (max 1.57500ms min 0.84700ms deviation of 0.72800ms) to complete write+delete+write data (13,398.20359 megabytes per second, 17,900 files tested)
+test_is_anomalous=false
+
+```
+
+
 
