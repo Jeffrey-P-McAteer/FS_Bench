@@ -59,7 +59,8 @@ int main(int argc, char** argv) {
   std::random_device rand;
   std::default_random_engine rand_engine(rand());
   std::uniform_int_distribution<int_fast32_t> uniform_dist_bignums(0, INT_FAST32_MAX);
-  std::independent_bits_engine<std::default_random_engine, CHAR_BIT, BYTE_T> random_bytes_engine;
+  // Windows cannot represent "unsigned char" in its independent_bits_engine -_-
+  std::independent_bits_engine<std::default_random_engine, CHAR_BIT, unsigned short> random_bytes_engine;
 
   const int_fast32_t num_folders = 100;
   const int_fast32_t num_files_in_folder = 1000;
