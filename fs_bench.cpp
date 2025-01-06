@@ -372,6 +372,45 @@ std::vector<double> normalized_trimmed_histogram(
   return trimmed_norm_values;
 }
 
+#if defined(_WIN32) || defined(WIN32)
+std::wstring histogram_to_string(std::vector<double>& histogram) {
+  // See https://en.wikipedia.org/wiki/Box-drawing_characters
+  std::wstringstream ss;
+  for (double f : histogram) {
+    if (f < 0.10f) {
+      ss << "▁";
+    }
+    else if (f < 0.20f) {
+      ss << "▂";
+    }
+    else if (f < 0.30f) {
+      ss << "▃";
+    }
+    else if (f < 0.40f) {
+      ss << "▄";
+    }
+    else if (f < 0.50f) {
+      ss << "▅";
+    }
+    else if (f < 0.60f) {
+      ss << "▆";
+    }
+    else if (f < 0.70f) {
+      ss << "▇";
+    }
+    else if (f < 0.80f) {
+      ss << "█";
+    }
+    else if (f < 0.90f) {
+      ss << "▉";
+    }
+    else {
+      ss << "▉";
+    }
+  }
+  return ss.str();
+}
+#else
 std::string histogram_to_string(std::vector<double>& histogram) {
   // See https://en.wikipedia.org/wiki/Box-drawing_characters
   std::stringstream ss;
@@ -409,6 +448,8 @@ std::string histogram_to_string(std::vector<double>& histogram) {
   }
   return ss.str();
 }
+#endif
+
 
 void print_report(
   int64_t num_file_extensions,
