@@ -14,6 +14,9 @@
 #include <fstream>
 #include <iterator>
 
+#include <string>
+using namespace std::string_literals; // enables s-suffix for std::string literals used by windows unicode support
+
 #if defined(_WIN32) || defined(WIN32)
 #include "fs_bench_os_windows.hpp"
 #else
@@ -378,34 +381,34 @@ std::wstring histogram_to_string(std::vector<double>& histogram) {
   std::wstringstream ss;
   for (double f : histogram) {
     if (f < 0.10f) {
-      ss << "▁";
+      ss << LR"▁";
     }
     else if (f < 0.20f) {
-      ss << "▂";
+      ss << LR"▂";
     }
     else if (f < 0.30f) {
-      ss << "▃";
+      ss << LR"▃";
     }
     else if (f < 0.40f) {
-      ss << "▄";
+      ss << LR"▄";
     }
     else if (f < 0.50f) {
-      ss << "▅";
+      ss << LR"▅";
     }
     else if (f < 0.60f) {
-      ss << "▆";
+      ss << LR"▆";
     }
     else if (f < 0.70f) {
-      ss << "▇";
+      ss << LR"▇";
     }
     else if (f < 0.80f) {
-      ss << "█";
+      ss << LR"█";
     }
     else if (f < 0.90f) {
-      ss << "▉";
+      ss << LR"▉";
     }
     else {
-      ss << "▉";
+      ss << LR"▉";
     }
   }
   return ss.str();
