@@ -488,7 +488,7 @@ void print_report(
         "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
 
 #if defined(_WIN32) || defined(WIN32)
-    std::wcout << histogram_to_string(histogram) << std::endl;
+    std::wcout << histogram_to_string(histogram) << /*std::endl*/ L"\r\n"; // Seriously, no std::wendl? I hate WTF-16 \o/
 #else
     std::cout << histogram_to_string(histogram) << std::endl;
 #endif
