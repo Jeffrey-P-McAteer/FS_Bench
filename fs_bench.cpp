@@ -379,8 +379,8 @@ std::vector<double> normalized_trimmed_histogram(
 std::string histogram_to_string(std::vector<double>& histogram) {
   // See https://en.wikipedia.org/wiki/Box-drawing_characters
   std::stringstream ss;
-  for (int line_num=0; line_num < 10; line_num += 1) {
-    double mark_val = (double) (10-line_num) / 10.0;
+  for (int line_num=0; line_num < 5; line_num += 1) {
+    double mark_val = (double) (5-line_num) / 5.0;
     for (double f : histogram) {
       if (f >= mark_val) {
         ss << "*";
@@ -455,7 +455,7 @@ void print_report(
     double min_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_min[i]).count() ) / 1000.0;
     double deviation_ms = max_ext_ms - min_ext_ms;
 
-    auto histogram = normalized_trimmed_histogram(600, 0.01, per_file_ext_durations[i]);
+    auto histogram = normalized_trimmed_histogram(1200, 0.01, per_file_ext_durations[i]);
 
     /* // Debug
     std::ranges::copy(histogram, std::ostream_iterator<float>(std::cout, " "));
