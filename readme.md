@@ -237,5 +237,140 @@ test_is_anomalous=false
 
 ```
 
+Windows 11 on NVME SSD through Thunderbolt cable, with histogram graphs
+
+```
+test_folder="C:\\Users\\Jeffrey\\Downloads\\test-data"
+folder_device_path=TODO implement C:\Users\Jeffrey\FS_Bench\fs_bench_os_windows.hpp:6
+Creating 100 folders which will each have 1,000 files of various extensions containing 65,536 bytes of data written to them, file will be deleted, finally file will be written again.
+If deletion fails OR writing to file fails, test is flagged as anomalous because the timing data is now useless (ie we did not measure what we wanted to b/c an I/O operation failed)
+Completed writing 6,250.0 GB of data to 100,000 files.
+Test took 1m 57s 867.0ms
+= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =
+ .exe files averaged 1.06600ms (min 0.34200ms max 110.04100ms deviation of 109.69900ms) to complete write+delete+write data (10,612.10131 megabytes per second, 18,100 files tested)
+*
+*
+*
+*
+*
+
+ .dll files averaged 1.25000ms (min 0.33600ms max 281.77500ms deviation of 281.43900ms) to complete write+delete+write data (8,300.00000 megabytes per second, 16,600 files tested)
+*
+*
+*
+*
+*
+
+ .txt files averaged 1.07400ms (min 0.32900ms max 60.00500ms deviation of 59.67600ms) to complete write+delete+write data (9,834.72998 megabytes per second, 16,900 files tested)
+*
+**
+**
+**
+**
+
+.json files averaged 1.16500ms (min 0.34800ms max 145.97800ms deviation of 145.63000ms) to complete write+delete+write data (7,832.61803 megabytes per second, 14,600 files tested)
+*
+*
+*
+*
+*
+
+  .so files averaged 1.29500ms (min 0.33700ms max 142.60400ms deviation of 142.26700ms) to complete write+delete+write data (8,542.47104 megabytes per second, 17,700 files tested)
+*
+*
+*
+*
+*
+
+ .bin files averaged 1.21500ms (min 0.34400ms max 151.70000ms deviation of 151.35600ms) to complete write+delete+write data (8,281.89300 megabytes per second, 16,100 files tested)
+*
+*
+*
+*
+*
+
+= = = = Trimmed Distribution MIN/MAX Report (removes statistical outlier figures at first+last 2% of values) = = = =
+ .exe files averaged 0.80500ms (min 0.38700ms max 7.37600ms deviation of 6.98900ms) to complete write+delete+write data (13,431.67702 megabytes per second, 17,300 files tested)
+    *
+   ****
+  ******
+ *********
+**************
+
+ .dll files averaged 0.84000ms (min 0.39000ms max 8.53800ms deviation of 8.14800ms) to complete write+delete+write data (11,830.35714 megabytes per second, 15,900 files tested)
+   *
+  ****
+ ******
+ *******
+************
+
+ .txt files averaged 0.80300ms (min 0.38700ms max 7.62500ms deviation of 7.23800ms) to complete write+delete+write data (12,608.96638 megabytes per second, 16,200 files tested)
+    *
+   ****
+  ******
+ *********
+**************
+
+.json files averaged 0.83300ms (min 0.39600ms max 8.13500ms deviation of 7.73900ms) to complete write+delete+write data (10,504.20168 megabytes per second, 14,000 files tested)
+   *
+  ****
+ ******
+ ********
+************
+
+  .so files averaged 0.85100ms (min 0.38900ms max 8.79400ms deviation of 8.40500ms) to complete write+delete+write data (12,411.86839 megabytes per second, 16,900 files tested)
+   *
+  ***
+ ******
+ *******
+***********
+
+ .bin files averaged 0.83700ms (min 0.38800ms max 8.62800ms deviation of 8.24000ms) to complete write+delete+write data (11,499.40263 megabytes per second, 15,400 files tested)
+   *
+  ****
+ ******
+ *******
+************
+```
+
+Arch Linux on NVME with Histograms
+
+```
+test_folder="/j/downloads/test-space"
+folder_device_path=/dev/nvme0n1p3
+Creating 100 folders which will each have 1,000 files of various extensions containing 65,536 bytes of data written to them, file will be deleted, finally file will be written again.
+If deletion fails OR writing to file fails, test is flagged as anomalous because the timing data is now useless (ie we did not measure what we wanted to b/c an I/O operation failed)
+Completed writing 6,250.0 GB of data to 100,000 files.
+Test took 0m 4s 660.7ms
+= = = = Absolute MIN/MAX Report (includes statistical outlier figures) = = = =
+ .exe files averaged 0.04600ms (min 0.03500ms max 1.93600ms deviation of 1.90100ms) to complete write+delete+write data (111,875.00000 megabytes per second, 17,900 files tested)
+▄▉▆▂▁
+ .dll files averaged 0.04600ms (min 0.03500ms max 1.37900ms deviation of 1.34400ms) to complete write+delete+write data (110,000.00000 megabytes per second, 17,600 files tested)
+▂█▉█▅▂▁▁
+ .txt files averaged 0.04600ms (min 0.03500ms max 0.94800ms deviation of 0.91300ms) to complete write+delete+write data (99,375.00000 megabytes per second, 15,900 files tested)
+▁▆▉▉▉█▅▃▂▁▁▁▁▁
+.json files averaged 0.04600ms (min 0.03500ms max 2.06800ms deviation of 2.03300ms) to complete write+delete+write data (103,750.00000 megabytes per second, 16,600 files tested)
+▄▉▆▂▁
+  .so files averaged 0.04600ms (min 0.03500ms max 1.17200ms deviation of 1.13700ms) to complete write+delete+write data (108,125.00000 megabytes per second, 17,300 files tested)
+▁▅▉▉▉▇▅▃▂▁▁▁
+ .bin files averaged 0.04600ms (min 0.03500ms max 1.73300ms deviation of 1.69800ms) to complete write+delete+write data (91,875.00000 megabytes per second, 14,700 files tested)
+▄▉▉▅▂▁
+= = = = Trimmed Distribution MIN/MAX Report (removes statistical outlier figures at first+last 2% of values) = = = =
+ .exe files averaged 0.04500ms (min 0.03700ms max 0.08000ms deviation of 0.04300ms) to complete write+delete+write data (106,875.00000 megabytes per second, 17,100 files tested)
+▆▉▉▆▃▂▁
+ .dll files averaged 0.04500ms (min 0.03700ms max 0.08200ms deviation of 0.04500ms) to complete write+delete+write data (105,000.00000 megabytes per second, 16,800 files tested)
+▇▉▆▃▁
+ .txt files averaged 0.04500ms (min 0.03700ms max 0.08100ms deviation of 0.04400ms) to complete write+delete+write data (95,000.00000 megabytes per second, 15,200 files tested)
+▇▉▉▆▃▂▁
+.json files averaged 0.04500ms (min 0.03700ms max 0.07900ms deviation of 0.04200ms) to complete write+delete+write data (99,375.00000 megabytes per second, 15,900 files tested)
+▆▉▉▆▃▂▁
+  .so files averaged 0.04400ms (min 0.03700ms max 0.08000ms deviation of 0.04300ms) to complete write+delete+write data (103,750.00000 megabytes per second, 16,600 files tested)
+▆▉▉▅▃▁▁
+ .bin files averaged 0.04500ms (min 0.03700ms max 0.07600ms deviation of 0.03900ms) to complete write+delete+write data (88,125.00000 megabytes per second, 14,100 files tested)
+▇▉▉▆▃▂▁
+test_is_anomalous=false
+```
+
+
 
 
