@@ -484,7 +484,11 @@ void print_report(
         "(min " << min_ext_ms <<"ms max " << max_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
         "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
 
+#if defined(_WIN32) || defined(WIN32)
+    std::wcout << histogram_to_string(histogram) << std::endl;
+#else
     std::cout << histogram_to_string(histogram) << std::endl;
+#endif
 
   }
 
