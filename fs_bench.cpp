@@ -393,6 +393,7 @@ std::string histogram_to_string(std::vector<double>& histogram) {
   }
   return ss.str();
 }
+//*
 #else
 std::string histogram_to_string(std::vector<double>& histogram) {
   // See https://en.wikipedia.org/wiki/Box-drawing_characters
@@ -432,7 +433,7 @@ std::string histogram_to_string(std::vector<double>& histogram) {
   return ss.str();
 }
 #endif
-
+/* */
 
 void print_report(
   int64_t num_file_extensions,
@@ -455,7 +456,7 @@ void print_report(
     double min_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_min[i]).count() ) / 1000.0;
     double deviation_ms = max_ext_ms - min_ext_ms;
 
-    auto histogram = normalized_trimmed_histogram(1200, 0.01, per_file_ext_durations[i]);
+    auto histogram = normalized_trimmed_histogram(1000, 0.02, per_file_ext_durations[i]);
 
     /* // Debug
     std::ranges::copy(histogram, std::ostream_iterator<float>(std::cout, " "));
