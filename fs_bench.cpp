@@ -278,10 +278,12 @@ int main(int argc, char** argv) {
 
 // Precondition: we assume per_file_ext_durations has been sorted low -> high!
 std::vector<double> normalized_trimmed_histogram(
-  int64_t num_buckets, double min_normalized_value_to_render,
+  int64_t remaining_recursions_allowed,
+  int64_t num_buckets, double min_normalized_value_to_render, int64_t min_returned_num_buckets,
   std::vector<std::chrono::high_resolution_clock::duration>& per_file_ext_durations
 )
 {
+  remaining_recursions_allowed -= 1;
   std::vector<double> bucket_norm_values;
   bucket_norm_values.reserve(num_buckets);
 
@@ -310,9 +312,9 @@ std::vector<double> normalized_trimmed_histogram(
   std::cout << "max_microseconds = " << max_microseconds << std::endl;
   /**/
 
-  if (bucket_width_microseconds < 2 && num_buckets >= 2) {
+  if (bucket_width_microseconds < 1 && num_buckets >= 2 && remaining_recursions_allowed > 0) {
     // Recurse w/ fewer buckets! (because i*0 will always be 0)
-    return normalized_trimmed_histogram(num_buckets / 2, min_normalized_value_to_render, per_file_ext_durations);
+    return normalized_trimmed_histogram(remaining_recursions_allowed, num_buckets / 2, min_normalized_value_to_render, min_returned_num_buckets, per_file_ext_durations);
   }
 
   for (int64_t i=0; i<num_buckets; i+=1) {
@@ -368,8 +370,20 @@ std::vector<double> normalized_trimmed_histogram(
     trimmed_norm_values.push_back(bucket_norm_values[i]);
   }
 
-  if (trimmed_norm_values.size() < 1 && per_file_ext_durations.size() > 0 && min_normalized_value_to_render > 0.00000001 && min_normalized_value_to_render < 1.0) {
-    return normalized_trimmed_histogram(num_buckets, min_normalized_value_to_render / 10.0, per_file_ext_durations);
+  // If we have 1 squished line, expand it w/ more buckets
+  if (trimmed_norm_values.size() > 0 && trimmed_norm_values.size() < min_returned_num_buckets && num_buckets < 1000000 && per_file_ext_durations.size() > 0 && remaining_recursions_allowed > 0) {
+    auto possibly_better = normalized_trimmed_histogram(remaining_recursions_allowed, (num_buckets*3)/2, min_normalized_value_to_render * 0.75, min_returned_num_buckets, per_file_ext_durations);
+    if (possibly_better.size() > trimmed_norm_values.size()) {
+      return possibly_better;
+    }
+    else {
+      return trimmed_norm_values;
+    }
+  }
+
+  // If we have no values at all increase the number of low values graphed
+  if (trimmed_norm_values.size() < 1 && per_file_ext_durations.size() > 0 && min_normalized_value_to_render > 0.00000001 && min_normalized_value_to_render < 1.0 && remaining_recursions_allowed > 0) {
+    return normalized_trimmed_histogram(remaining_recursions_allowed, num_buckets, min_normalized_value_to_render / 10.0, min_returned_num_buckets, per_file_ext_durations);
   }
 
   return trimmed_norm_values;
@@ -456,7 +470,7 @@ void print_report(
     double min_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_min[i]).count() ) / 1000.0;
     double deviation_ms = max_ext_ms - min_ext_ms;
 
-    auto histogram = normalized_trimmed_histogram(380, 0.02, per_file_ext_durations[i]);
+    auto histogram = normalized_trimmed_histogram(100000000000, 200, 0.01, 12, per_file_ext_durations[i]);
 
     /* // Debug
     std::ranges::copy(histogram, std::ostream_iterator<float>(std::cout, " "));
