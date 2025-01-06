@@ -47,11 +47,20 @@ int main(int argc, char** argv) {
   if (argc < 2) {
     DIE(1, "ARG1 should be a filesystem path to an empty folder which will be populated with test I/O activity.");
   }
+
+  std::cout.imbue(std::locale(""));
+  std::cout << std::fixed << std::showpoint;
+
   const std::filesystem::path test_folder = argv[1];
   VARDUMP(test_folder);
 
   const std::string folder_device_path = get_device_path(test_folder);
   VARDUMP(folder_device_path);
+
+  std::cout << "Creating " << num_folders << " folders which will each have "
+            << num_files_in_folder << " files of various extensions containing "
+            << file_content_length_bytes << " bytes of data written to them, file will be deleted, finally file will be written again." << std::endl;
+  std::cout << "If deletion fails OR writing to file fails, test is flagged as anomalous because the timing data is now useless (ie we did not measure what we wanted to b/c an I/O operation failed)" << std::endl;
 
   bool test_is_anomalous = false;
 
