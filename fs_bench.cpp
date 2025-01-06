@@ -379,8 +379,8 @@ std::vector<double> normalized_trimmed_histogram(
 std::string histogram_to_string(std::vector<double>& histogram) {
   // See https://en.wikipedia.org/wiki/Box-drawing_characters
   std::stringstream ss;
-  for (int line_num=0; line_num < 5; line_num += 1) {
-    double mark_val = (double) (5-line_num) / 5.0;
+  for (int line_num=0; line_num < 10; line_num += 1) {
+    double mark_val = (double) (10-line_num) / 10.0;
     for (double f : histogram) {
       if (f >= mark_val) {
         ss << "*";
