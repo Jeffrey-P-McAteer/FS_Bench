@@ -40,10 +40,10 @@ void print_report(
 
 // Constants
 const int64_t num_folders = 100;
-const int64_t num_files_in_folder = 1000;
+const int64_t num_files_in_folder = 800;
 const int64_t file_content_length_bytes = 64 * 1024;
 std::string file_extensions[] = {
-  ".exe", ".dll", ".txt", ".json", ".so", ".bin"
+  ".exe", ".dll", ".txt", ".json", ".so", ".bin", ".db",
 };
 const int_fast64_t total_bytes_written = num_folders * num_files_in_folder * file_content_length_bytes;
 
@@ -52,6 +52,8 @@ int main(int argc, char** argv) {
   if (argc < 2) {
     DIE(1, "ARG1 should be a filesystem path to an empty folder which will be populated with test I/O activity.");
   }
+
+  auto proc_start = std::chrono::high_resolution_clock::now();
 
   std::cout.imbue(std::locale(""));
   std::cout << std::fixed << std::showpoint;
@@ -139,7 +141,7 @@ int main(int argc, char** argv) {
     per_file_ext_durations[i].reserve( num_folders * num_files_in_folder / (std::size(file_extensions)/2) );
   }
 
-  auto start = std::chrono::high_resolution_clock::now();
+  auto test_start = std::chrono::high_resolution_clock::now();
 
   for (int64_t folder_i=0; folder_i < num_folders; folder_i += 1) {
 
@@ -189,7 +191,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  auto elapsed = std::chrono::high_resolution_clock::now() - start;
+  auto test_elapsed = std::chrono::high_resolution_clock::now() - test_start;
 
   // Test DONE, compute statistics
 
@@ -252,7 +254,7 @@ int main(int argc, char** argv) {
 
   }
 
-  long long total_microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+  long long total_microseconds = std::chrono::duration_cast<std::chrono::microseconds>(test_elapsed).count();
 
   long m = total_microseconds / (60 * 1000 * 1000);
   long s = (total_microseconds - (m * 60 * 1000 * 1000)) / (1000 * 1000);
@@ -288,6 +290,14 @@ int main(int argc, char** argv) {
 
   std::cout << std::boolalpha;
   VARDUMP(test_is_anomalous);
+
+  auto proc_elapsed = std::chrono::high_resolution_clock::now() - proc_start;
+  total_microseconds = std::chrono::duration_cast<std::chrono::microseconds>(proc_elapsed).count();
+
+  m = total_microseconds / (60 * 1000 * 1000);
+  s = (total_microseconds - (m * 60 * 1000 * 1000)) / (1000 * 1000);
+  ms = ((double) ((total_microseconds - (m * 60 * 1000 * 1000)) - (s * 1000 * 1000))) / 1000.0;
+  std::cout << "Entire Runtime is " << m << "m " << s << "s " << ms << "ms" << std::endl;
 
   return 0;
 }
