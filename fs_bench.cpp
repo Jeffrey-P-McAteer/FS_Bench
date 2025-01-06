@@ -106,10 +106,15 @@ int main(int argc, char** argv) {
     file_ext_count[i] = 0;
   }
 
-  for (int64_t folder_i=0; folder_i < num_folders; folder_i += 1) {
+  for (int64_t folder_i=0; folder_i < num_folders / 2; folder_i += 1) {
     std::stringstream ss;
     ss << std::hex << uniform_dist_bignums(rand_engine);
     folder_paths.push_back( test_folder / ss.str() );
+  }
+  // We re-use the same folder names and add test logic to delete + re-use those folders.
+  // This excercises a failure case observed before where write + delete + write == filesystem permission error.
+  for (int64_t folder_i=num_folders / 2; folder_i < num_folders; folder_i += 1) {
+    folder_paths.push_back(folder_paths[folder_i - (num_folders / 2)]);
   }
 
   for (int64_t file_i=0; file_i < num_files_in_folder; file_i += 1) {
@@ -137,7 +142,18 @@ int main(int argc, char** argv) {
   auto start = std::chrono::high_resolution_clock::now();
 
   for (int64_t folder_i=0; folder_i < num_folders; folder_i += 1) {
-    std::filesystem::create_directories(folder_paths[folder_i]);
+
+    if (std::filesystem::exists(folder_paths[folder_i])) {
+      std::filesystem::remove_all(folder_paths[folder_i]);
+    }
+
+    if (std::filesystem::exists(folder_paths[folder_i])) {
+      std::cout << "WARNING: We attempted to delete " << folder_paths[folder_i] << " before writing to it but were somehow unsuccessful. Test will continue but results are now uncomparable to other tests." << std::endl;
+      test_is_anomalous = true;
+    }
+    else {
+      std::filesystem::create_directories(folder_paths[folder_i]);
+    }
 
     for (int64_t file_i=0; file_i < num_files_in_folder; file_i += 1) {
       auto file_start = std::chrono::high_resolution_clock::now();
