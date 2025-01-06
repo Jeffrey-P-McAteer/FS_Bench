@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <functional>
 #include <fstream>
+#include <iterator>
 
 #if defined(_WIN32) || defined(WIN32)
 #include "fs_bench_os_windows.hpp"
@@ -27,6 +28,7 @@
 void print_report(
   int64_t num_file_extensions,
   std::string file_extensions[],
+  std::vector<std::chrono::high_resolution_clock::duration> per_file_ext_durations[],
   std::chrono::high_resolution_clock::duration per_file_ext_duration_sums[],
   int64_t file_ext_count[],
   std::chrono::high_resolution_clock::duration per_file_ext_duration_max[],
@@ -201,6 +203,11 @@ int main(int argc, char** argv) {
     file_ext_count_within_ten_perc[i] = 0;
   }
 
+  std::vector<std::chrono::high_resolution_clock::duration> per_file_ext_durations_ten_perc[std::size(file_extensions)];
+  for (int64_t i=0; i<std::size(file_extensions); i+=1) {
+    per_file_ext_durations_ten_perc[i].reserve( num_folders * num_files_in_folder / (std::size(file_extensions)/2) );
+  }
+
   for (int64_t i=0; i<std::size(file_extensions); i+=1) {
     // Each of per_file_ext_durations[i] will be sorted MIN -> MAX
     std::sort(per_file_ext_durations[i].begin(), per_file_ext_durations[i].end());
@@ -213,11 +220,12 @@ int main(int argc, char** argv) {
       per_file_ext_duration_max[i] = per_file_ext_durations[i][per_file_ext_durations[i].size()-1];
       per_file_ext_duration_min[i] = per_file_ext_durations[i][0];
 
-      per_file_ext_duration_max_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()-1) * 9)/10 ];
-      per_file_ext_duration_min_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()) * 1)/10 ];
-      for (int64_t j=((per_file_ext_durations[i].size()) * 1)/10; j < ((per_file_ext_durations[i].size()-1) * 9)/10 ; j+=1) {
+      per_file_ext_duration_max_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()-1) * 98)/100 ];
+      per_file_ext_duration_min_ten_perc[i] = per_file_ext_durations[i][ ((per_file_ext_durations[i].size()) * 2)/100 ];
+      for (int64_t j=((per_file_ext_durations[i].size()) * 2)/100; j < ((per_file_ext_durations[i].size()-1) * 98)/100 ; j+=1) {
           per_file_ext_duration_sums_ten_perc[i] += per_file_ext_durations[i][j];
           file_ext_count_within_ten_perc[i] += 1;
+          per_file_ext_durations_ten_perc[i].push_back( per_file_ext_durations[i][j] );
       }
       file_ext_count_within_ten_perc[i] /= num_folders; // The above loop has timings for ALL folders, causing an over-count here if we do not divide by number of folders.
 
@@ -241,16 +249,18 @@ int main(int argc, char** argv) {
   print_report(
     std::size(file_extensions),
     file_extensions,
+    per_file_ext_durations,
     per_file_ext_duration_sums,
     file_ext_count,
     per_file_ext_duration_max,
     per_file_ext_duration_min
   );
 
-  std::cout << "= = = = 10% normal distribution MIN/MAX Report (removes statistical outlier figures) = = = =" << std::endl;
+  std::cout << "= = = = Trimmed Distribution MIN/MAX Report (removes statistical outlier figures at first+last 2% of values) = = = =" << std::endl;
   print_report(
     std::size(file_extensions),
     file_extensions,
+    per_file_ext_durations_ten_perc,
     per_file_ext_duration_sums_ten_perc,
     file_ext_count_within_ten_perc,
     per_file_ext_duration_max_ten_perc,
@@ -263,9 +273,147 @@ int main(int argc, char** argv) {
   return 0;
 }
 
+// Precondition: we assume per_file_ext_durations has been sorted low -> high!
+std::vector<double> normalized_trimmed_histogram(
+  int64_t num_buckets, double min_normalized_value_to_render,
+  std::vector<std::chrono::high_resolution_clock::duration>& per_file_ext_durations
+)
+{
+  std::vector<double> bucket_norm_values;
+  bucket_norm_values.reserve(num_buckets);
+
+  std::vector<int64_t> bucket_counts;
+  bucket_counts.reserve(num_buckets);
+
+  int64_t min_microseconds = INT64_MAX;
+  int64_t max_microseconds = 0;
+  for (auto d : per_file_ext_durations) {
+    int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(d).count();
+    if (microseconds < min_microseconds) {
+      min_microseconds = microseconds;
+    }
+    if (microseconds > max_microseconds) {
+      max_microseconds = microseconds;
+    }
+  }
+
+  int64_t bucket_width_microseconds = (max_microseconds - min_microseconds) / num_buckets;
+
+  /* // Debugging
+  std::cout << "num_buckets = " << num_buckets << std::endl;
+  std::cout << "per_file_ext_durations.size() = " << per_file_ext_durations.size() << std::endl;
+  std::cout << "bucket_width_microseconds = " << bucket_width_microseconds << std::endl;
+  std::cout << "min_microseconds = " << min_microseconds << std::endl;
+  std::cout << "max_microseconds = " << max_microseconds << std::endl;
+  /**/
+
+  if (bucket_width_microseconds < 2 && num_buckets >= 2) {
+    // Recurse w/ fewer buckets! (because i*0 will always be 0)
+    return normalized_trimmed_histogram(num_buckets / 2, min_normalized_value_to_render, per_file_ext_durations);
+  }
+
+  for (int64_t i=0; i<num_buckets; i+=1) {
+    int64_t bucket_min_micros = min_microseconds + (i * bucket_width_microseconds);
+    int64_t bucket_max_micros = min_microseconds + ((i+1) * bucket_width_microseconds);
+
+    int64_t num_items_in_bucket = 0;
+    for (int64_t duration_i = 0; duration_i < per_file_ext_durations.size(); duration_i+=1) {
+      int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_durations[duration_i]).count();
+      if (microseconds > bucket_min_micros && microseconds < bucket_max_micros) {
+        num_items_in_bucket += 1;
+      }
+    }
+    bucket_counts.push_back(num_items_in_bucket);
+  }
+
+  int64_t min_bucket_val = INT64_MAX;
+  int64_t max_bucket_val = 0;
+  for (int64_t i=0; i<num_buckets; i+=1) {
+    if (bucket_counts[i] < min_bucket_val) {
+      min_bucket_val = bucket_counts[i];
+    }
+    if (bucket_counts[i] > max_bucket_val) {
+      max_bucket_val = bucket_counts[i];
+    }
+  }
+
+  for (int64_t i=0; i<num_buckets; i+=1) {
+    double f = (double) (bucket_counts[i]-min_bucket_val) / (double) std::max((int64_t) 1, (max_bucket_val-min_bucket_val));
+    bucket_norm_values.push_back(
+      f
+    );
+  }
+
+  int64_t first_nonzero_idx = num_buckets-1;
+  int64_t last_nonzero_idx = 0;
+
+  for (int64_t i=0; i<num_buckets; i+=1) {
+    if (bucket_norm_values[i] > min_normalized_value_to_render) {
+      first_nonzero_idx = i;
+      break;
+    }
+  }
+  for (int64_t i=num_buckets-1; i>=0; i-=1) {
+    if (bucket_norm_values[i] > min_normalized_value_to_render) {
+      last_nonzero_idx = i;
+      break;
+    }
+  }
+
+  std::vector<double> trimmed_norm_values;
+  for (int64_t i=first_nonzero_idx; i<last_nonzero_idx; i+=1) {
+    trimmed_norm_values.push_back(bucket_norm_values[i]);
+  }
+
+  if (trimmed_norm_values.size() < 1 && per_file_ext_durations.size() > 0 && min_normalized_value_to_render > 0.00000001 && min_normalized_value_to_render < 1.0) {
+    return normalized_trimmed_histogram(num_buckets, min_normalized_value_to_render / 10.0, per_file_ext_durations);
+  }
+
+  return trimmed_norm_values;
+}
+
+std::string histogram_to_string(std::vector<double>& histogram) {
+  // See https://en.wikipedia.org/wiki/Box-drawing_characters
+  std::stringstream ss;
+  for (double f : histogram) {
+    if (f < 0.10f) {
+      ss << "▁";
+    }
+    else if (f < 0.20f) {
+      ss << "▂";
+    }
+    else if (f < 0.30f) {
+      ss << "▃";
+    }
+    else if (f < 0.40f) {
+      ss << "▄";
+    }
+    else if (f < 0.50f) {
+      ss << "▅";
+    }
+    else if (f < 0.60f) {
+      ss << "▆";
+    }
+    else if (f < 0.70f) {
+      ss << "▇";
+    }
+    else if (f < 0.80f) {
+      ss << "█";
+    }
+    else if (f < 0.90f) {
+      ss << "▉";
+    }
+    else {
+      ss << "▉";
+    }
+  }
+  return ss.str();
+}
+
 void print_report(
   int64_t num_file_extensions,
   std::string file_extensions[],
+  std::vector<std::chrono::high_resolution_clock::duration> per_file_ext_durations[],
   std::chrono::high_resolution_clock::duration per_file_ext_duration_sums[],
   int64_t file_ext_count[],
   std::chrono::high_resolution_clock::duration per_file_ext_duration_max[],
@@ -283,9 +431,20 @@ void print_report(
     double min_ext_ms = ((double) std::chrono::duration_cast<std::chrono::microseconds>(per_file_ext_duration_min[i]).count() ) / 1000.0;
     double deviation_ms = max_ext_ms - min_ext_ms;
 
+    auto histogram = normalized_trimmed_histogram(600, 0.01, per_file_ext_durations[i]);
+
+    /* // Debug
+    std::ranges::copy(histogram, std::ostream_iterator<float>(std::cout, " "));
+    std::cout << std::endl;
+    /* */
+
     std::cout << std::setw(5) << file_extensions[i] << " files averaged " <<
         std::setprecision(5) << ext_ms << "ms " <<
-        "(max " << max_ext_ms <<"ms min " << min_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
+        "(min " << min_ext_ms <<"ms max " << max_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
         "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
+
+    std::cout << histogram_to_string(histogram) << std::endl;
+
   }
+
 }
