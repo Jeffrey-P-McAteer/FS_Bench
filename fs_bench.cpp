@@ -451,6 +451,20 @@ std::string histogram_to_string(std::vector<double>& histogram) {
 #endif
 /* */
 
+std::vector<double> trim_histogram_wider_than(int64_t max_width, std::vector<double>& histogram) {
+  if (histogram.size() <= max_width) {
+    return histogram;
+  }
+  std::vector<double> new_histogram;
+  for (int64_t i=0; i < histogram.size(); i+=2) {
+    new_histogram.push_back(histogram[i]);
+  }
+  if (new_histogram.size() > max_width) {
+    return trim_histogram_wider_than(max_width, new_histogram);
+  }
+  return new_histogram;
+}
+
 void print_report(
   int64_t num_file_extensions,
   std::string file_extensions[],
@@ -473,6 +487,7 @@ void print_report(
     double deviation_ms = max_ext_ms - min_ext_ms;
 
     auto histogram = normalized_trimmed_histogram(400, 0.002, per_file_ext_durations[i]);
+    histogram = trim_histogram_wider_than(80, histogram);
 
     /* // Debug
     std::ranges::copy(histogram, std::ostream_iterator<float>(std::cout, " "));
