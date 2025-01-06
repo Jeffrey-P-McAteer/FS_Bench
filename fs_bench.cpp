@@ -381,34 +381,34 @@ std::wstring histogram_to_string(std::vector<double>& histogram) {
   std::wstringstream ss;
   for (double f : histogram) {
     if (f < 0.10f) {
-      ss << LR"▁";
+      ss << L"▁";
     }
     else if (f < 0.20f) {
-      ss << LR"▂";
+      ss << L"▂";
     }
     else if (f < 0.30f) {
-      ss << LR"▃";
+      ss << L"▃";
     }
     else if (f < 0.40f) {
-      ss << LR"▄";
+      ss << L"▄";
     }
     else if (f < 0.50f) {
-      ss << LR"▅";
+      ss << L"▅";
     }
     else if (f < 0.60f) {
-      ss << LR"▆";
+      ss << L"▆";
     }
     else if (f < 0.70f) {
-      ss << LR"▇";
+      ss << L"▇";
     }
     else if (f < 0.80f) {
-      ss << LR"█";
+      ss << L"█";
     }
     else if (f < 0.90f) {
-      ss << LR"▉";
+      ss << L"▉";
     }
     else {
-      ss << LR"▉";
+      ss << L"▉";
     }
   }
   return ss.str();
