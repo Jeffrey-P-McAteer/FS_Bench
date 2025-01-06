@@ -376,40 +376,20 @@ std::vector<double> normalized_trimmed_histogram(
 }
 
 #if defined(_WIN32) || defined(WIN32)
-std::wstring histogram_to_string(std::vector<double>& histogram) {
+std::string histogram_to_string(std::vector<double>& histogram) {
   // See https://en.wikipedia.org/wiki/Box-drawing_characters
-  std::wstringstream ss;
-  for (double f : histogram) {
-    if (f < 0.10f) {
-      ss << L"▁";
+  std::stringstream ss;
+  for (int line_num=0; line_num < 10; line_num += 1) {
+    double mark_val = (double) (10-line_num) / 10.0;
+    for (double f : histogram) {
+      if (f >= mark_val) {
+        ss << "*";
+      }
+      else {
+        ss << " ";
+      }
     }
-    else if (f < 0.20f) {
-      ss << L"▂";
-    }
-    else if (f < 0.30f) {
-      ss << L"▃";
-    }
-    else if (f < 0.40f) {
-      ss << L"▄";
-    }
-    else if (f < 0.50f) {
-      ss << L"▅";
-    }
-    else if (f < 0.60f) {
-      ss << L"▆";
-    }
-    else if (f < 0.70f) {
-      ss << L"▇";
-    }
-    else if (f < 0.80f) {
-      ss << L"█";
-    }
-    else if (f < 0.90f) {
-      ss << L"▉";
-    }
-    else {
-      ss << L"▉";
-    }
+    ss << std::endl;
   }
   return ss.str();
 }
@@ -487,11 +467,7 @@ void print_report(
         "(min " << min_ext_ms <<"ms max " << max_ext_ms << "ms deviation of " << deviation_ms << "ms) " <<
         "to complete write+delete+write data (" << (bytes_per_second/(1024.0 * 1024.0)) << " megabytes per second, "<< (num_folders*file_ext_count[i]) <<" files tested)" << std::endl;
 
-#if defined(_WIN32) || defined(WIN32)
-    std::wcout << histogram_to_string(histogram) << /*std::endl*/ L"\r\n"; // Seriously, no std::wendl? I hate WTF-16 \o/
-#else
     std::cout << histogram_to_string(histogram) << std::endl;
-#endif
 
   }
 
