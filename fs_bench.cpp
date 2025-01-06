@@ -497,7 +497,7 @@ void print_report(
     double deviation_ms = max_ext_ms - min_ext_ms;
 
     auto histogram = normalized_trimmed_histogram(400, 0.002, per_file_ext_durations[i]);
-    histogram = trim_histogram_wider_than(80, histogram);
+    histogram = trim_histogram_wider_than(200, histogram);
 
     /* // Debug
     std::ranges::copy(histogram, std::ostream_iterator<float>(std::cout, " "));
